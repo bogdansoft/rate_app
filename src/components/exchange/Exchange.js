@@ -10,7 +10,7 @@ export const Exchange = () => {
         <div className="exchange">
             <div className="exchangeContainer">
                 <div className="exchangeContent">
-                    <div><p>Basic currency: &nbsp;  &nbsp;Date: </p></div>
+                    <div><p>Basic currency: &nbsp;{state.base}  &nbsp;Date: {state.date}</p></div>
                     <ul>
                         {Object.keys(currency).map((item, i) => {
                             return (

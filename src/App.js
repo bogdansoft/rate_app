@@ -17,14 +17,32 @@ class App extends Component {
             rate: '',
             date: '',
             currency: {
-                USD: {name: 'Dollar США', flag: USD, course: '9999999'},
-                CNY: {name: 'Chinese Uan', flag: CNY, course: '9999999'},
-                EUR: {name: 'Euro', flag: EUR, course: '9999999'},
-                GBP: {name: 'Funt Sterling', flag: GBP, course: '9999999'},
-                JPY: {name: 'Japanese Jena', flag: JPY, course: '9999999'},
-                CHF: {name: 'Swiss Frank', flag: CHF, course: '9999999'},
+                USD: {name: 'Dollar США', flag: USD, course: ''},
+                CNY: {name: 'Chinese Uan', flag: CNY, course: ''},
+                EUR: {name: 'Euro', flag: EUR, course: ''},
+                GBP: {name: 'Funt Sterling', flag: GBP, course: ''},
+                JPY: {name: 'Japanese Jena', flag: JPY, course: ''},
+                CHF: {name: 'Swiss Frank', flag: CHF, course: ''},
             }
         }
+    }
+
+    componentDidMount() {
+
+        fetch(`https://api.exchangeratesapi.io/latest?base=${this.state.base}`)
+            .then((response) => response.json()).then((response) => {
+            const rateArr = ['USD', 'CNY', 'EUR', 'GBP', 'JPY', 'CHF']
+            const currency = {...this.state.currency}
+            for (let i = 0; i < rateArr.length; i++) {
+                currency[rateArr[i]].course = response.rates[rateArr[i]]
+            }
+            console.log(currency)
+            this.setState({
+                rate: response.rates,
+                date: response.date,
+                currency
+            })
+        })
     }
 
     render() {
