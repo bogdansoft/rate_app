@@ -23,8 +23,30 @@ class App extends Component {
                 GBP: {name: 'Funt Sterling', flag: GBP, course: ''},
                 JPY: {name: 'Japanese Jena', flag: JPY, course: ''},
                 CHF: {name: 'Swiss Frank', flag: CHF, course: ''},
-            }
+            },
+            //calculator
+            inputValue: 100,
+            currencyValue: 'USD',
+            result: null
         }
+    }
+
+    inputValueHandler = (event) => {
+        this.setState({inputValue: event.target.value, result: null})
+    }
+
+    currencyValueHandler = (event) => {
+        this.setState({inputValue: event.target.value, result: null})
+    }
+
+    calculatorHandler = async (value) => {
+        let result
+        await fetch(`https://api.exchangeratesapi.io/latest?base=EUR`)
+            .then((response) => response.json())
+            .then((response) => {
+                result = response.rates[value] * this.state.inputValue
+            })
+        this.setState({result})
     }
 
     componentDidMount() {
@@ -47,7 +69,12 @@ class App extends Component {
 
     render() {
         return (
-            <RateContext.Provider value={{state: this.state}}>
+            <RateContext.Provider value={{
+                state: this.state,
+                inputValueHandler: this.inputValueHandler,
+                currencyValueHandler: this.currencyValueHandler,
+                calculatorHandler: this.calculatorHandler,
+            }}>
                 <Layout/>
             </RateContext.Provider>
         );
