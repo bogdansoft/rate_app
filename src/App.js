@@ -8,6 +8,7 @@ import GBP from './image/GBP.png'
 import JPY from './image/JPY.png'
 import USD from './image/USD.png'
 import {RateContext} from "./context/RateContext";
+import axios from "axios";
 
 class App extends Component {
     constructor(props) {
@@ -27,8 +28,45 @@ class App extends Component {
             //calculator
             inputValue: 100,
             currencyValue: 'USD',
-            result: null
+            result: null,
+            //sample
+            sample: {
+                base: 'USD',
+                base2: 'EUR',
+                date: '',
+                course: ''
+            },
+            sampleList: ''
         }
+    }
+
+    baseHandler = (event) => {
+        this.setState({sample: {...this.state.sample, base: event.target.value}})
+    }
+
+    base2Handler = (event) => {
+        this.setState({sample: {...this.state.sample, base2: event.target.value}})
+    }
+
+    sampleDateHandler = (event) => {
+        this.setState({sample: {...this.state.sample, date: event.target.value}})
+    }
+
+    dataWrite = async () => {
+        await fetch(`https://api.exchangeratesapi.io/${this.state.sample.date}?base=${this.state.sample.base}`)
+            .then((response) => response.json())
+            .then((response) => {
+                this.setState({sample: {...this.state.sample, course: response.rates[this.state.sample.base2]}})
+            })
+
+        await axios.post('https://rateapp-f16f6-default-rtdb.europe-west1.firebasedatabase.app/sample.json', this.state.sample)
+            .then((response) => {
+                return ('')
+            })
+        await axios('https://rateapp-f16f6-default-rtdb.europe-west1.firebasedatabase.app/sample.json')
+            .then((response) => {
+                this.setState({sampleList: response.data})
+            })
     }
 
     inputValueHandler = (event) => {
@@ -74,6 +112,10 @@ class App extends Component {
                 inputValueHandler: this.inputValueHandler,
                 currencyValueHandler: this.currencyValueHandler,
                 calculatorHandler: this.calculatorHandler,
+                baseHandler: this.baseHandler,
+                base2Handler: this.base2Handler,
+                sampleDateHandler: this.sampleDateHandler,
+                dataWrite: this.dataWrite
             }}>
                 <Layout/>
             </RateContext.Provider>
