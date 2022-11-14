@@ -1,3 +1,4 @@
+import React from "react";
 import './App.scss';
 import {Component} from "react";
 import Layout from "./components/layout/Layout";
@@ -22,6 +23,8 @@ class App extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            auth: false,
+            error: '',
             formControls: {
                 email: {
                     value: '',
@@ -70,8 +73,76 @@ class App extends Component {
                 date: '',
                 course: ''
             },
-            sampleList: ''
+            sampleList: '',
+            showModal: false,
+            isFormValid: false
         }
+    }
+
+    loginHandler = async () => {
+        const authData = {
+            email: this.state.formControls.email.value,
+            password: this.state.formControls.password.value,
+            returnSecureToken: true
+        }
+
+        try {
+            const response = await axios.post(' https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyCvdlZF7J_qNG2nYVbEirkyO65IvE63-xo', authData)
+
+            if (response.data.idToken) {
+
+                const formControls = [...this.state.formControls]
+                formControls.email.value = ''
+                formControls.password.value = ''
+
+                this.setState({
+                    auth: true,
+                    showModal: false,
+                    error: '',
+                    formControls
+                })
+            }
+        } catch (e) {
+            console.log(e)
+            this.setState({error: 'Error'})
+        }
+    }
+
+    registerHandler = async () => {
+        const authData = {
+            email: this.state.formControls.email.value,
+            password: this.state.formControls.password.value,
+            returnSecureToken: true
+        }
+
+        try {
+            const response = await axios.post('https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyCvdlZF7J_qNG2nYVbEirkyO65IvE63-xo', authData)
+
+            if (response.data.idToken) {
+
+                const formControls = [...this.state.formControls]
+                formControls.email.value = ''
+                formControls.password.value = ''
+
+                this.setState({
+                    auth: true,
+                    showModal: false,
+                    error: '',
+                    formControls
+                })
+            }
+        } catch (e) {
+            console.log(e)
+            this.setState({error: 'Error'})
+        }
+    }
+
+    modalShowHandler = () => {
+        this.setState({showModal: true})
+    }
+
+    modalHideHandler = () => {
+        this.setState({showModal: false})
     }
 
     validateControl = (value, validation) => {
@@ -101,7 +172,11 @@ class App extends Component {
         control.touched = true
         control.valid = this.validateControl(control.value, control.validation)
         formControls[controlName] = control
-        this.setState({formControls})
+        let isFormValid = true
+        Object.keys(formControls).forEach(name => {
+            isFormValid = formControls[name].valid && isFormValid
+        })
+        this.setState({formControls, isFormValid})
     }
 
     renderInputs = () => {
@@ -208,9 +283,13 @@ class App extends Component {
                 sampleDateHandler: this.sampleDateHandler,
                 dataWrite: this.dataWrite,
                 sampleRemove: this.sampleRemove,
-                renderInputs: this.renderInputs
+                renderInputs: this.renderInputs,
+                modalHideHandler: this.modalHideHandler,
+                modalShowHandler: this.modalShowHandler,
+                loginHandler: this.loginHandler,
+                registerHandler: this.registerHandler
             }}>
-                <Dark/>
+                <Dark showModal={this.state.showModal} modalHideHandler={this.modalHideHandler}/>
                 <Modal/>
                 <Layout/>
             </RateContext.Provider>
